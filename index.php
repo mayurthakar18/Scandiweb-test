@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style1.css">
     <title>Product List</title>
-
 </head>
 <body>
     <?php include('includes/db.php'); ?>
@@ -28,48 +27,49 @@
     <div class="container">
         <div class="header">
             <h1>Product List</h1>
-            <div class="action-buttons">
-                <a href="add-product.php" class="add-button">Add Product</a>
+            <div class="action-buttons" text="ADD">
+                <a href="add-product.php" class="add-button" >ADD</a>
                 <form id="mass-delete-form" action="#" method="POST">
-                    <button type="submit" id="delete-product-btn">MASS DELETE</button>
-                    
+                    <button type="submit" id="delete-product-btn" text="MASS DELETE">MASS DELETE</button>
                     <input type="hidden" name="delete_products">
                 </form>
             </div>
         </div>
     </div>
-	<div class"container">
-	<?php
-                    // Fetch products from the database
-                    $sql = "SELECT * FROM products ORDER BY id";
-                    $result = $conn->query($sql);
-                    if ($result->num_rows > 0) {
-                        echo '<div class="product-list">';
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<div class="product-box">';
-                            echo '<input type="checkbox" class="delete-checkbox" name="selectedProducts[]" value="' . $row['id'] . '">';
-                            echo '<div class="product-info">';
-                            echo '<span>SKU: ' . $row['sku'] . '</span><br>';
-                            echo '<span>Name: ' . $row['name'] . '</span><br>';
-                            echo '<span> $' . $row['price'] . '</span><br>';
-                            echo '<span>';
-                            if ($row['product_type'] === 'DVD') {
-                                echo 'Size: ' . $row['description'] . ' MB';
-                            } elseif ($row['product_type'] === 'Book') {
-                                echo 'Weight: ' . $row['description'] . ' Kg';
-                            } elseif ($row['product_type'] === 'Furniture') {
-                                echo 'Dimensions: ' . $row['description'];
-                            }
-                            echo '</span>';
-                            echo '</div>';
-                            echo '</div>';
-                        }
-                        echo '</div>';
-                    } else {
-                        echo 'No products found';
-                    }
-                    ?>
-	</div>
+    <div class="container">
+        <?php
+        // Fetch products from the database
+        $sql = "SELECT * FROM products ORDER BY id";
+        $result = $conn->query($sql);
+        if ($result->num_rows > 0) {
+            echo '<div class="product-list">';
+            while ($row = $result->fetch_assoc()) {
+                echo '<div class="product-box">';
+                echo '<input type="checkbox" class="delete-checkbox" name="selectedProducts[]" value="' . $row['id'] . '">';
+                echo '<div class="product-info">';
+                echo '<span>SKU: ' . $row['sku'] . '</span><br>';
+                echo '<span>Name: ' . $row['name'] . '</span><br>';
+                echo '<span> $' . $row['price'] . '</span><br>';
+                echo '<span>';
+                 // Parse and display attributes based on product type
+            $attributes = explode('*', $row['attributes']); // Assuming the attributes are separated by '*'
+            if ($row['type'] === 'DVD') {
+                echo 'Size: ' . $attributes[0] . ' MB';
+            } elseif ($row['type'] === 'Book') {
+                echo 'Weight: ' . $attributes[0] . ' Kg';
+            } elseif ($row['type'] === 'Furniture') {
+                echo 'Dimensions: ' . $attributes[0] . 'x' . $attributes[1] . 'x' . $attributes[2];
+            }
+                echo '</span>';
+                echo '</div>';
+                echo '</div>';
+            }
+            echo '</div>';
+        } else {
+            echo 'No products found';
+        }
+        ?>
+    </div>
     <footer>
         <hr style="border-top: 1px solid black; margin: 10px 0;">
         <div>Scandiweb Test assignment</div>
@@ -95,7 +95,6 @@
                                 selectedProducts: selectedProducts
                             },
                             success: function(response) {
-                                // alert(response);
                                 window.location.reload();
                             },
                             error: function(xhr, status, error) {
@@ -111,4 +110,3 @@
     </script>
 </body>
 </html>
-

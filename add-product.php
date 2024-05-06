@@ -1,6 +1,6 @@
 <?php
 // Check if form data is submitted
-if(isset($_POST['sku'], $_POST['name'], $_POST['price'], $_POST['productType'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Connect to the database
     include('includes/db.php');
     
@@ -26,20 +26,19 @@ if(isset($_POST['sku'], $_POST['name'], $_POST['price'], $_POST['productType']))
     $sql_check = "SELECT sku FROM products WHERE sku = '$sku'";
     $result_check = $conn->query($sql_check);
     if ($result_check->num_rows > 0) {
-        echo "<script>alert('SKU already exists');</script>";
-        //exit; // Stop further execution
+        echo "<script>alert('SKU already exists'); window.location.href = 'add-product.php';</script>";
+        exit; // Stop further execution
     }
     
     // Insert data into the database
-    $sql = "INSERT INTO products (sku, name, price, product_type, description) 
+    $sql = "INSERT INTO products (sku, name, price, type, attributes) 
             VALUES ('$sku', '$name', '$price', '$productType', '$specificAttribute')";
     
     if ($conn->query($sql) === TRUE) {
-        // Redirect to Product List page
         header("Location: index.php");
         exit();
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error: " . $sql . "<br>" . $conn->error; // Display SQL error
     }
 
     // Close database connection
@@ -58,7 +57,7 @@ if(isset($_POST['sku'], $_POST['name'], $_POST['price'], $_POST['productType']))
 <body>
     <div class="container">
         <h2>Add Product</h2>
-        <form id="product_form" action="#" method="POST">
+        <form id="product_form" action="add-product.php" method="POST">
             <div class="form-group">
                 <label for="sku">SKU:</label>
                 <input type="text" id="sku" name="sku" required autocomplete="off">
@@ -84,7 +83,7 @@ if(isset($_POST['sku'], $_POST['name'], $_POST['price'], $_POST['productType']))
                 <!-- Product type specific attribute fields will be added here dynamically -->
             </div>
             <div class="form-group">
-                <button type="button" id="saveBtn">Save</button>
+                <button type="submit" id="saveBtn">Save</button>
                 <button type="button" id="cancelBtn">Cancel</button>
             </div>
         </form>
@@ -93,33 +92,75 @@ if(isset($_POST['sku'], $_POST['name'], $_POST['price'], $_POST['productType']))
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
- $(document).ready(function(){
+    $(document).ready(function(){
+            // Map product types to descriptions, attribute names, and IDs
+            var productAttributes = {
+                'DVD': {
+                    description: 'Please, provide size (in MB)',
+                    attributeName: 'size',
+                    placeholder: 'Size (MB)',
+                    id: 'sizeInput'
+                },
+                'Book': {
+                    description: 'Please, provide weight (in Kg)',
+                    attributeName: 'weight',
+                    placeholder: 'Weight (Kg)',
+                    id: 'weightInput'
+                },
+                'Furniture': {
+                    description: 'Please, provide dimensions (HxWxL in cm)',
+                    attributeName: 'dimensions',
+                    placeholder: 'Dimensions (HxWxL)',
+                    id: 'dimensionsInput'
+                }
+            };
+
             $('#productType').change(function(){
                 var productType = $(this).val();
-                var description = '';
-                if (productType === 'DVD') {
-                    description = 'Please, provide size (in MB)';
-                    $('#specificAttribute').html('<label for="size">' + description + '</label><br><input type="text" id="size" name="size" placeholder="Size (MB)" required autocomplete="off">');
-                } else if (productType === 'Book') {
-                    description = 'Please, provide weight (in Kg)';
-                    $('#specificAttribute').html('<label for="weight">' + description + '</label><br><input type="text" id="weight" name="weight" placeholder="Weight (Kg)" required autocomplete="off">');
-                } else if (productType === 'Furniture') {
-                    description = 'Please, provide dimensions (HxWxL in cm)';
-                    $('#specificAttribute').html('<label for="dimensions">' + description + '</label><br><input type="text" id="dimensions" name="dimensions" placeholder="Dimensions (HxWxL)" required autocomplete="off">');
-                }
+                var attributes = productAttributes[productType];
+                var description = attributes.description;
+                var attributeName = attributes.attributeName;
+                var placeholder = attributes.placeholder;
+                var id = attributes.id;
+
+                $('#specificAttribute').html('<label for="' + attributeName + '">' + description + '</label><br><input type="text" id="' + id + '" name="' + attributeName + '" placeholder="' + placeholder + '" required autocomplete="off">');
             });
-
-
-
 
             $('#saveBtn').click(function(){
                 // Check if all fields are filled
                 if ($('#sku').val() === '' || $('#name').val() === '' || $('#price').val() === '' || $('#productType').val() === '') {
                     showNotification("Please, submit required data");
-                } else {
-                    // Submit the form
-                    $('#product_form').submit();
+                    return;
                 }
+                // Check if price is a valid number
+                var price = $('#price').val();
+                if (isNaN(price) || parseFloat(price) <= 0) {
+                    showNotification("Please, provide a valid price");
+                    return;
+                }
+                // Check if size, weight, and dimensions are valid
+                var productType = $('#productType').val();
+                if (productType === 'DVD') {
+                    var size = $('#sizeInput').val();
+                    if (!(/^\d+$/.test(size))) {
+                        showNotification("Please, provide the data of indicated type");
+                        return;
+                    }
+                } else if (productType === 'Book') {
+                    var weight = $('#weightInput').val();
+                    if (!(/^\d+$/.test(weight))) {
+                        showNotification("Please, provide the data of indicated type");
+                        return;
+                    }
+                } else if (productType === 'Furniture') {
+                    var dimensions = $('#dimensionsInput').val();
+                    if (!(/^\d+$/.test(dimensions))) {
+                        showNotification("Please, provide the data of indicated type");
+                        return;
+                    }
+                }
+                // Submit the form
+                $('#product_form').submit();
             });
 
             $('#cancelBtn').click(function(){
@@ -133,11 +174,5 @@ if(isset($_POST['sku'], $_POST['name'], $_POST['price'], $_POST['productType']))
             }
         });
     </script>
-	<footer>
-        <hr style="border-top: 1px solid black; margin: 10px 0;">
-        <div>Scandiweb Test assignment</div>
-    </footer>
 </body>
 </html>
-
-
