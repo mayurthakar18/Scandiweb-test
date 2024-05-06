@@ -45,7 +45,7 @@
             echo '<div class="product-list">';
             while ($row = $result->fetch_assoc()) {
                 echo '<div class="product-box">';
-                echo '<input type="checkbox" class="delete-checkbox" name="selectedProducts[]" value="' . $row['id'] . '">';
+                echo '<input type="checkbox" class=".delete-checkbox" name="selectedProducts[]" value="' . $row['id'] . '">';
                 echo '<div class="product-info">';
                 echo '<span>SKU: ' . $row['sku'] . '</span><br>';
                 echo '<span>Name: ' . $row['name'] . '</span><br>';
