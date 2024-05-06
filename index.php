@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/style1.css">
     <title>Product List</title>
 </head>
 <body>
@@ -45,7 +45,7 @@
             echo '<div class="product-list">';
             while ($row = $result->fetch_assoc()) {
                 echo '<div class="product-box">';
-                echo '<input type="checkbox" class=".delete-checkbox" name="selectedProducts[]" value="' . $row['id'] . '">';
+                echo '<input type="checkbox" class="delete-checkbox" name="selectedProducts[]" value="' . $row['id'] . '">';
                 echo '<div class="product-info">';
                 echo '<span>SKU: ' . $row['sku'] . '</span><br>';
                 echo '<span>Name: ' . $row['name'] . '</span><br>';

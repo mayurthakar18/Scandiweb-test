@@ -1,51 +1,3 @@
-<?php
-// Check if form data is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Connect to the database
-    include('includes/db.php');
-    
-    // Prepare variables
-    $sku = $_POST['sku'];
-    $name = $_POST['name'];
-    $price = $_POST['price'];
-    $productType = $_POST['productType'];
-    
-    // Initialize specific attribute value as empty
-    $specificAttribute = '';
-    
-    // Determine specific attribute based on product type
-    if ($productType === 'DVD' && isset($_POST['size'])) {
-        $specificAttribute = $_POST['size'];
-    } elseif ($productType === 'Book' && isset($_POST['weight'])) {
-        $specificAttribute = $_POST['weight'];
-    } elseif ($productType === 'Furniture' && isset($_POST['dimensions'])) {
-        $specificAttribute = $_POST['dimensions'];
-    }
-    
-    // Check if SKU already exists
-    $sql_check = "SELECT sku FROM products WHERE sku = '$sku'";
-    $result_check = $conn->query($sql_check);
-    if ($result_check->num_rows > 0) {
-        echo "<script>alert('SKU already exists'); window.location.href = 'add-product.php';</script>";
-        exit; // Stop further execution
-    }
-    
-    // Insert data into the database
-    $sql = "INSERT INTO products (sku, name, price, type, attributes) 
-            VALUES ('$sku', '$name', '$price', '$productType', '$specificAttribute')";
-    
-    if ($conn->query($sql) === TRUE) {
-        header("Location: index.php");
-        exit();
-    } else {
-        echo "Error: " . $sql . "<br>" . $conn->error; // Display SQL error
-    }
-
-    // Close database connection
-    $conn->close();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -132,32 +84,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     showNotification("Please, submit required data");
                     return;
                 }
-                // Check if price is a valid number
-                var price = $('#price').val();
-                if (isNaN(price) || parseFloat(price) <= 0) {
-                    showNotification("Please, provide a valid price");
-                    return;
-                }
                 // Check if size, weight, and dimensions are valid
                 var productType = $('#productType').val();
                 if (productType === 'DVD') {
                     var size = $('#sizeInput').val();
                     if (!(/^\d+$/.test(size))) {
-                        showNotification("Please, provide the data of indicated type");
+                        showNotification("Please, provide valid size");
                         return;
                     }
                 } else if (productType === 'Book') {
                     var weight = $('#weightInput').val();
                     if (!(/^\d+$/.test(weight))) {
-                        showNotification("Please, provide the data of indicated type");
+                        showNotification("Please, provide valid weight");
                         return;
                     }
                 } else if (productType === 'Furniture') {
                     var dimensions = $('#dimensionsInput').val();
                     if (!(/^\d+$/.test(dimensions))) {
-                        showNotification("Please, provide the data of indicated type");
+                        showNotification("Please, provide valid dimensions");
                         return;
                     }
+                }
+                // Check if price is a valid number
+                var price = $('#price').val();
+                if (isNaN(price) || parseFloat(price) <= 0) {
+                    showNotification("Please, provide a valid price");
+                    return;
                 }
                 // Submit the form
                 $('#product_form').submit();

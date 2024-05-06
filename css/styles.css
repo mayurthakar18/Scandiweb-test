@@ -60,11 +60,7 @@ button:hover {
 #specificAttribute {
     margin-bottom: 20px;
 }
-.delete-checkbox {
-    position: absolute; 
-    top: 5px; 
-    left: 5px; 
-}
+
 .notification {
     padding: 10px;
     margin-bottom: 10px;
