@@ -1,4 +1,5 @@
 <?php include('includes/db.php'); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style1.css">
     <title>Product List</title>
+    <style>
+        .center-align {
+            text-align: center;
+            margin-top: 150px;
+        }
+        .center-align .action-buttons {
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
     <?php
@@ -30,13 +40,12 @@
         <div class="header">
             <h1>Product List</h1>
             <div class="action-buttons">
-             <a href="add-product.php" class="add-button">ADD</a>
-                 <form id="mass-delete-form" method="POST">
-        <button type="submit" id="delete-product-btn" name="mass_delete">MASS DELETE</button>
-        <input type="hidden" name="delete_products">
-    </form>
-</div>
-
+                <a href="add-product.php" class="add-button">ADD</a>
+                <form id="mass-delete-form" method="POST">
+                    <button type="submit" id="delete-product-btn">MASS DELETE</button>
+                    <input type="hidden" name="delete_products">
+                </form>
+            </div>
         </div>
     </div>
     <div class="container">
@@ -67,7 +76,13 @@
             }
             echo '</div>';
         } else {
-            echo 'No products found';
+            
+            echo '<div class="center-align">';
+            echo '<p>No products found!</p>';
+            echo '<div class="action-buttons">';
+            echo '<a href="add-product.php" class="add-button">ADD PRODUCT</a>';
+            echo '</div>';
+            echo '</div>';
         }
         ?>
     </div>
@@ -77,25 +92,37 @@
     </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      $(document).ready(function() {
-    $('#mass-delete-form').submit(function(e) {
-        e.preventDefault();
-        var selectedProducts = [];
-        $('.delete-checkbox:checked').each(function() {
-            selectedProducts.push($(this).val());
+        $(document).ready(function() {
+            $('#mass-delete-form').submit(function(e) {
+                e.preventDefault();
+                var selectedProducts = [];
+                $('.delete-checkbox:checked').each(function() {
+                    selectedProducts.push($(this).val());
+                });
+
+                if (selectedProducts.length > 0) {
+                    if (confirm("Are you sure you want to delete selected products?")) {
+                        // Submit the form with selected product SKUs
+                        $.ajax({
+                            type: "POST",
+                            url: "index.php",
+                            data: {
+                                delete_products: true,
+                                selectedProducts: selectedProducts
+                            },
+                            success: function(response) {
+                                window.location.reload();
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(xhr.responseText);
+                            }
+                        });
+                    }
+                } else {
+                    alert('Please select products to delete.');
+                }
+            });
         });
-
-        if (selectedProducts.length > 0) {
-            if (confirm("Are you sure you want to delete selected products?")) {
-                // Submit the form with selected product SKUs
-                $(this).submit(); // submit the form normally
-            }
-        } else {
-            alert('Please select products to delete.');
-        }
-    });
-});
-
     </script>
 </body>
 </html>

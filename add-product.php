@@ -199,6 +199,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         });
     </script>
-
+ <footer>
+        <hr style="border-top: 1px solid black; margin: 10px 0;">
+        <div>Scandiweb Test assignment</div>
+    </footer>
 </body>
 </html>
