@@ -55,14 +55,23 @@
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
             echo '<div class="product-list">';
+            // If there are products, start a product list div
             while ($row = $result->fetch_assoc()) {
+                // Iterate over each product
                 echo '<div class="product-box">';
+                // Start a product box div
                 echo '<input type="checkbox" class="delete-checkbox" name="selectedProducts[]" value="' . $row['sku'] . '">';
+                // Add a checkbox for the product
                 echo '<div class="product-info">';
+                // Start a product info div
                 echo '<span>SKU: ' . $row['sku'] . '</span><br>';
+                // Display SKU
                 echo '<span>Name: ' . $row['name'] . '</span><br>';
+                // Display name
                 echo '<span> $' . $row['price'] . '</span><br>';
+                // Display price
                 echo '<span>';
+                // Start a span for additional product details
                 if ($row['productType'] === 'DVD') {
                     echo 'Size: ' . $row['size'] . ' MB';
                 } elseif ($row['productType'] === 'Book') {
@@ -70,13 +79,18 @@
                 } elseif ($row['productType'] === 'Furniture') {
                     echo 'Dimensions: ' . $row['height'] . 'x' . $row['width'] . 'x' . $row['length'] . ' cm';
                 }
+                // Display additional details based on product type
                 echo '</span>';
+                // Close the span
                 echo '</div>';
+                // Close the product info div
                 echo '</div>';
+                // Close the product box div
             }
             echo '</div>';
+            // Close the product list div
         } else {
-            
+            // If no products found, display a message and add a button to add a new product
             echo '<div class="center-align">';
             echo '<p>No products found!</p>';
             echo '<div class="action-buttons">';
@@ -84,6 +98,7 @@
             echo '</div>';
             echo '</div>';
         }
+        
         ?>
     </div>
     <footer>
@@ -101,26 +116,26 @@
                 });
 
                 if (selectedProducts.length > 0) {
-                    if (confirm("Are you sure you want to delete selected products?")) {
-                        // Submit the form with selected product SKUs
-                        $.ajax({
-                            type: "POST",
-                            url: "index.php",
-                            data: {
-                                delete_products: true,
-                                selectedProducts: selectedProducts
-                            },
-                            success: function(response) {
-                                window.location.reload();
-                            },
-                            error: function(xhr, status, error) {
-                                console.error(xhr.responseText);
-                            }
-                        });
-                    }
-                } else {
-                    alert('Please select products to delete.');
-                }
+    // Submit the form with selected product SKUs
+    $.ajax({
+        type: "POST",
+        url: "index.php",
+        data: {
+            delete_products: true,
+            selectedProducts: selectedProducts
+        },
+        // AJAX request to delete products
+        success: function(response) {
+            // Reload the page after successful deletion
+            window.location.reload();
+        },
+        error: function(xhr, status, error) {
+            // Log errors to the console
+            console.error(xhr.responseText);
+        }
+    });
+} 
+
             });
         });
     </script>
