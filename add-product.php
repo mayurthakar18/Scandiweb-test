@@ -1,4 +1,5 @@
 <?php
+
 // Check if form data is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Connect to the database
@@ -10,17 +11,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $_POST['price'];
     $productType = $_POST['productType'];
     
-    // Initialize specific attribute value as empty
-    $specificAttribute = '';
-    
-    // Determine specific attribute based on product type
-    if ($productType === 'DVD' && isset($_POST['size'])) {
-        $specificAttribute = $_POST['size'];
-    } elseif ($productType === 'Book' && isset($_POST['weight'])) {
-        $specificAttribute = $_POST['weight'];
-    } elseif ($productType === 'Furniture' && isset($_POST['dimensions'])) {
-        $specificAttribute = $_POST['dimensions'];
-    }
+    // Define an object to map product types to specific attributes
+    $attributeMap = [
+        'DVD' => ['size' => $_POST['size']],
+        'Book' => ['weight' => $_POST['weight']],
+        'Furniture' => [
+            'height' => $_POST['height'],
+            'width' => $_POST['width'],
+            'length' => $_POST['length']
+        ]
+    ];
+
+    // Get the specific attribute based on product type
+    $specificAttribute = isset($attributeMap[$productType]) ? $attributeMap[$productType] : null;
     
     // Check if SKU already exists
     $sql_check = "SELECT sku FROM products WHERE sku = '$sku'";
@@ -31,9 +34,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // Insert data into the database
-    $sql = "INSERT INTO products (sku, name, price, type, attributes) 
-            VALUES ('$sku', '$name', '$price', '$productType', '$specificAttribute')";
-    
+    $sql = "INSERT INTO products (sku, name, price, productType";
+    $sql_values = "VALUES ('$sku', '$name', '$price', '$productType'";
+
+    // Add specific attributes to the query
+    foreach ($attributeMap[$productType] as $key => $value) {
+        $sql .= ", $key";
+        $sql_values .= ", '" . $value . "'";
+    }
+
+    $sql .= ") " . $sql_values . ")";
+
     if ($conn->query($sql) === TRUE) {
         header("Location: index.php");
         exit();
@@ -44,6 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Close database connection
     $conn->close();
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -83,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- Product type specific attribute fields will be added here dynamically -->
             </div>
             <div class="form-group">
-                <button type="submit" id="saveBtn">Save</button>
+                <button type="button" id="saveBtn">Save</button>
                 <button type="button" id="cancelBtn">Cancel</button>
             </div>
         </form>
@@ -92,89 +104,101 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-   
-$(document).ready(function(){
-        // Map product types to descriptions, attribute names, and IDs
-        var productAttributes = {
-            'DVD': {
-                description: 'Please, provide size (in MB)',
-                attributeName: 'size',
-                placeholder: 'Size (MB)',
-                id: 'sizeInput'
-            },
-            'Book': {
-                description: 'Please, provide weight (in Kg)',
-                attributeName: 'weight',
-                placeholder: 'Weight (Kg)',
-                id: 'weightInput'
-            },
-            'Furniture': {
-                description: 'Please, provide dimensions (HxWxL in cm)',
-                attributeName: 'dimensions',
-                placeholder: 'Dimensions (HxWxL)',
-                id: 'dimensionsInput'
-            }
-        };
+        $(document).ready(function(){
+            // Map product types to descriptions, attribute names, and IDs
+            var productAttributes = {
+                'DVD': {
+                    description: 'Please, provide size (in MB)',
+                    attributeName: 'size',
+                    placeholder: 'Size (MB)',
+                    id: 'size'
+                },
+                'Book': {
+                    description: 'Please, provide weight (in Kg)',
+                    attributeName: 'weight',
+                    placeholder: 'Weight (Kg)',
+                    id: 'weight'
+                },
+                'Furniture': {
+                    description: 'Please, provide dimensions (HxWxL)',
+                    attributes: [
+                        { name: 'Height', attributeName: 'height', placeholder: 'Height in cm', id: 'height' },
+                        { name: 'Width', attributeName: 'width', placeholder: 'Width in cm', id: 'width' },
+                        { name: 'Length', attributeName: 'length', placeholder: 'Length in cm', id: 'length' }
+                    ]
+                }
+            };
 
-        $('#productType').change(function(){
-            var productType = $(this).val();
-            var attributes = productAttributes[productType];
-            var description = attributes.description;
-            var attributeName = attributes.attributeName;
-            var placeholder = attributes.placeholder;
-            var id = attributes.id;
+            $('#productType').change(function(){
+                var productType = $(this).val();
+                var attributes = productAttributes[productType];
+                var html = '';
 
-            $('#specificAttribute').html('<label for="' + attributeName + '">' + description + '</label><br><input type="text" id="' + id + '" name="' + attributeName + '" placeholder="' + placeholder + '" required autocomplete="off">');
-        });
+                if (productType === 'DVD' || productType === 'Book') {
+                    html += '<label for="' + attributes.attributeName + '">' + attributes.description + '</label><br>';
+                    html += '<input type="text" id="' + attributes.id + '" name="' + attributes.attributeName + '" placeholder="' + attributes.placeholder + '" required autocomplete="off">';
+                } else if (productType === 'Furniture') {
+                    html += '<label>' + attributes.description + '</label><br>';
+                    $.each(attributes.attributes, function(index, attribute) {
+                        html += '<label for="' + attribute.attributeName + '">' + attribute.name + '</label><br>';
+                        html += '<input type="text" id="' + attribute.id + '" name="' + attribute.attributeName + '" placeholder="' + attribute.placeholder + '" required autocomplete="off"><br>';
+                    });
+                }
 
-        $('#saveBtn').click(function(){
-            // Check if all fields are filled
-            if ($('#sku').val() === '' || $('#name').val() === '' || $('#price').val() === '' || $('#productType').val() === '') {
-                showNotification("Please, submit required data");
-                return;
-            }
-            // Check if price is a valid number
-            var price = $('#price').val();
-            if (isNaN(price) || parseFloat(price) <= 0) {
-                showNotification("Please, provide a valid price");
-                return;
-            }
-            // Check if size, weight, and dimensions are valid
-            var productType = $('#productType').val();
-            if (productType === 'DVD') {
-                var size = $('#sizeInput').val();
-                if (!/^\d+$/.test(size)) {
-                    showNotification("Please, provide valid size (digits only)");
+                $('#specificAttribute').html(html);
+            });
+
+            $('#saveBtn').click(function(){
+                // Check if all fields are filled
+                if ($('#sku').val() === '' || $('#name').val() === '' || $('#price').val() === '' || $('#productType').val() === '') {
+                    showNotification("Please, submit required data");
                     return;
                 }
-            } else if (productType === 'Book') {
-                var weight = $('#weightInput').val();
-                if (!/^\d+$/.test(weight)) {
-                    showNotification("Please, provide valid weight (digits only)");
+                // Check if price is a valid number
+                var price = $('#price').val();
+                if (isNaN(price) || parseFloat(price) <= 0) {
+                    showNotification("Please, provide a valid price");
                     return;
                 }
-            } else if (productType === 'Furniture') {
-                var dimensions = $('#dimensionsInput').val();
-                if (!/^\d+$/.test(dimensions)) {
-                    showNotification("Please, provide valid dimensions (digits only)");
-                    return;
+                // Check if size, weight, and dimensions are valid
+                var productType = $('#productType').val();
+                if (productType === 'DVD') {
+                    var size = $('#size').val();
+                    if (!/^\d+$/.test(size)) {
+                        showNotification("Please, provide valid size (digits only)");
+                        return;
+                    }
+                } else if (productType === 'Book') {
+                    var weight = $('#weight').val();
+                    if (!/^\d+$/.test(weight)) {
+                        showNotification("Please, provide valid weight (digits only)");
+                        return;
+                    }
+                } else if (productType === 'Furniture') {
+                    var height = $('#height').val();
+                    var width = $('#width').val();
+                    var length = $('#length').val();
+                    if (!/^\d+$/.test(height) || !/^\d+$/.test(width) || !/^\d+$/.test(length)) {
+                        showNotification("Please, provide valid dimensions (digits only)");
+                        return;
+                    }
                 }
+                
+                // Submit the form
+                $('#product_form').submit();
+            });
+
+            $('#cancelBtn').click(function(){
+                window.location.href = 'index.php';
+            });
+
+            // Function to show notification
+            function showNotification(message) {
+                $('#notification').removeClass().addClass('notification');
+                $('#notification').text(message);
             }
-            // Submit the form
-            $('#product_form').submit();
         });
-
-        $('#cancelBtn').click(function(){
-            window.location.href = 'index.php';
-        });
-
-        // Function to show notification
-        function showNotification(message) {
-            $('#notification').removeClass().addClass('notification');
-            $('#notification').text(message);
-        }
-    });
-</script>
+    </script>
 
 </body>
 </html>
