@@ -104,109 +104,101 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-    $(document).ready(function(){
-        // Map product types to descriptions, attribute names, and IDs
-        var productAttributes = {
-            'DVD': {
-                description: 'Please, provide size (in MB)',
-                attributeName: 'size',
-                placeholder: 'Size (MB)',
-                id: 'size'
-            },
-            'Book': {
-                description: 'Please, provide weight (in Kg)',
-                attributeName: 'weight',
-                placeholder: 'Weight (Kg)',
-                id: 'weight'
-            },
-            'Furniture': {
-                description: 'Please, provide dimensions (HxWxL)',
-                attributes: [
-                    { name: 'Height', attributeName: 'height', placeholder: 'Height in cm', id: 'height' },
-                    { name: 'Width', attributeName: 'width', placeholder: 'Width in cm', id: 'width' },
-                    { name: 'Length', attributeName: 'length', placeholder: 'Length in cm', id: 'length' }
-                ]
-            }
-        };
+        $(document).ready(function(){
+            // Map product types to descriptions, attribute names, and IDs
+            var productAttributes = {
+                'DVD': {
+                    description: 'Please, provide size (in MB)',
+                    attributeName: 'size',
+                    placeholder: 'Size (MB)',
+                    id: 'size'
+                },
+                'Book': {
+                    description: 'Please, provide weight (in Kg)',
+                    attributeName: 'weight',
+                    placeholder: 'Weight (Kg)',
+                    id: 'weight'
+                },
+                'Furniture': {
+                    description: 'Please, provide dimensions (HxWxL)',
+                    attributes: [
+                        { name: 'Height', attributeName: 'height', placeholder: 'Height in cm', id: 'height' },
+                        { name: 'Width', attributeName: 'width', placeholder: 'Width in cm', id: 'width' },
+                        { name: 'Length', attributeName: 'length', placeholder: 'Length in cm', id: 'length' }
+                    ]
+                }
+            };
 
-        $('#productType').change(function(){
-            var productType = $(this).val();
-            var attributes = productAttributes[productType];
-            var html = '';
+            $('#productType').change(function(){
+                var productType = $(this).val();
+                var attributes = productAttributes[productType];
+                var html = '';
 
-            if (productType === 'DVD' || productType === 'Book') {
-                html += '<label for="' + attributes.attributeName + '">' + attributes.description + '</label><br>';
-                html += '<input type="text" id="' + attributes.id + '" name="' + attributes.attributeName + '" placeholder="' + attributes.placeholder + '" required autocomplete="off">';
-            } else if (productType === 'Furniture') {
-                html += '<label>' + attributes.description + '</label><br>';
-                $.each(attributes.attributes, function(index, attribute) {
-                    html += '<label for="' + attribute.attributeName + '">' + attribute.name + '</label><br>';
-                    html += '<input type="text" id="' + attribute.id + '" name="' + attribute.attributeName + '" placeholder="' + attribute.placeholder + '" required autocomplete="off"><br>';
-                });
-            }
+                if (productType === 'DVD' || productType === 'Book') {
+                    html += '<label for="' + attributes.attributeName + '">' + attributes.description + '</label><br>';
+                    html += '<input type="text" id="' + attributes.id + '" name="' + attributes.attributeName + '" placeholder="' + attributes.placeholder + '" required autocomplete="off">';
+                } else if (productType === 'Furniture') {
+                    html += '<label>' + attributes.description + '</label><br>';
+                    $.each(attributes.attributes, function(index, attribute) {
+                        html += '<label for="' + attribute.attributeName + '">' + attribute.name + '</label><br>';
+                        html += '<input type="text" id="' + attribute.id + '" name="' + attribute.attributeName + '" placeholder="' + attribute.placeholder + '" required autocomplete="off"><br>';
+                    });
+                }
 
-            $('#specificAttribute').html(html);
-        });
+                $('#specificAttribute').html(html);
+            });
 
-        $('#saveBtn').click(function(){
-            // Check if all fields are filled
-            if ($('#sku').val() === '' || $('#name').val() === '' || $('#price').val() === '' || $('#productType').val() === '') {
-                showNotification("Please, submit required data");
-                return;
-            }
-            // Check if price is a valid number
-            var price = $('#price').val();
-            if (isNaN(price) || parseFloat(price) <= 0) {
-                showNotification("Please, provide a valid price");
-                return;
-            }
-            // Check if size, weight, and dimensions are valid
-            var productType = $('#productType').val();
-            if (productType === 'DVD') {
-                var size = $('#size').val();
-                if (!/^\d+$/.test(size)) {
-                    showNotification("Please, provide valid size (digits only)");
+            $('#saveBtn').click(function(){
+                // Check if all fields are filled
+                if ($('#sku').val() === '' || $('#name').val() === '' || $('#price').val() === '' || $('#productType').val() === '') {
+                    showNotification("Please, submit required data");
                     return;
                 }
-            } else if (productType === 'Book') {
-                var weight = $('#weight').val();
-                if (!/^\d+$/.test(weight)) {
-                    showNotification("Please, provide valid weight (digits only)");
+                // Check if price is a valid number
+                var price = $('#price').val();
+                if (isNaN(price) || parseFloat(price) <= 0) {
+                    showNotification("Please, provide a valid price");
                     return;
                 }
-            } else if (productType === 'Furniture') {
-                var height = $('#height').val();
-                var width = $('#width').val();
-                var length = $('#length').val();
-                if (!/^\d+$/.test(height) || !/^\d+$/.test(width) || !/^\d+$/.test(length)) {
-                    showNotification("Please, provide valid dimensions (digits only)");
-                    return;
+                // Check if size, weight, and dimensions are valid
+                var productType = $('#productType').val();
+                if (productType === 'DVD') {
+                    var size = $('#size').val();
+                    if (!/^\d+$/.test(size)) {
+                        showNotification("Please, provide valid size (digits only)");
+                        return;
+                    }
+                } else if (productType === 'Book') {
+                    var weight = $('#weight').val();
+                    if (!/^\d+$/.test(weight)) {
+                        showNotification("Please, provide valid weight (digits only)");
+                        return;
+                    }
+                } else if (productType === 'Furniture') {
+                    var height = $('#height').val();
+                    var width = $('#width').val();
+                    var length = $('#length').val();
+                    if (!/^\d+$/.test(height) || !/^\d+$/.test(width) || !/^\d+$/.test(length)) {
+                        showNotification("Please, provide valid dimensions (digits only)");
+                        return;
+                    }
                 }
+                
+                // Submit the form
+                $('#product_form').submit();
+            });
+
+            $('#cancelBtn').click(function(){
+                window.location.href = 'index.php';
+            });
+
+            // Function to show notification
+            function showNotification(message) {
+                $('#notification').removeClass().addClass('notification');
+                $('#notification').text(message);
             }
-            
-            // Validate name field
-            var name = $('#name').val();
-            if (!/^[A-Za-z]+$/.test(name)) {
-                showNotification("Please, provide a valid name (alphabets only)");
-                return;
-            }
-            
-            // Submit the form
-            $('#product_form').submit();
         });
-
-        $('#cancelBtn').click(function(){
-            window.location.href = 'index.php';
-        });
-
-        // Function to show notification
-        function showNotification(message) {
-            $('#notification').removeClass().addClass('notification');
-            $('#notification').text(message);
-        }
-    });
-</script>
-
+    </script>
 
 </body>
 </html>
