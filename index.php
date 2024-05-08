@@ -40,11 +40,9 @@
         <div class="header">
             <h1>Product List</h1>
             <div class="action-buttons">
-            <a href="add-product.php" class="add-button">ADD</a>
-
+                <a href="add-product.php" class="add-button">ADD</a>
                 <form id="mass-delete-form" method="POST">
-                <button type="submit" id="mass-delete-btn">MASS DELETE</button>
-
+                    <button type="submit" id="delete-product-btn">MASS DELETE</button>
                     <input type="hidden" name="delete_products">
                 </form>
             </div>
