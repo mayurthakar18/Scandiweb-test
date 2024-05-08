@@ -30,16 +30,16 @@ button {
     align-items: center;
 }
 
-.add-button{
-    padding: 10px;
-    margin-left: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
+.add-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
     text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
+
 
 #delete-product-btn {
     padding: 10px;
