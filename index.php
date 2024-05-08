@@ -76,6 +76,7 @@
             }
             echo '</div>';
         } else {
+            
             echo '<div class="center-align">';
             echo '<p>No products found!</p>';
             echo '<div class="action-buttons">';
